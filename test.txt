@@ -1,0 +1,19 @@
+<-- 0|INDI|Y|@I2@
+--> 1 NAME Ping /Lu/
+<-- 1|NAME|Y|Ping /Lu/ 
+--> 2 GIVN Ping
+<-- 2|GIVN|N|Ping 
+--> 2 SURN Lu
+<-- 2|SURN|N|Lu 
+--> 2 _MARNM Lu
+<-- 2|_MARNM|N|Lu 
+--> 1 SEX F
+<-- 1|SEX|Y|F 
+--> 1 BIRT
+<-- 1|BIRT|Y
+--> 2 DATE 26 JUL 1970
+<-- 2|DATE|Y|26 JUL 1970 
+--> 1 FAMS @F1@
+<-- 1|FAMS|Y|@F1@ 
+--> 1 FAMC @F3@
+<-- 1|FAMC|Y|@F3@
