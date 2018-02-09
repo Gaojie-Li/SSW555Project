@@ -58,5 +58,4 @@ def process_ged(input_path, output_path):
     readable.close()
 
 
-process_ged('./proj02test.ged', 'test.txt')
-process_ged('./GEDCOMFile_GaojieLi.ged', 'my_tree.txt')
+process_ged('./tree.ged', 'result.txt')
