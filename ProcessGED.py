@@ -21,7 +21,7 @@ def process_ged(input_path, output_path):
     for line in readable:
         line = line.strip()
         writable.write('--> ' + line + '\n')
-        items = line.rstrip().split(' ')
+        items = line.split(' ')
 
         level = items[0]
         tag = ''
