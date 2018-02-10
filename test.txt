@@ -1,12 +1,6 @@
 <-- 0|INDI|Y|@I2@
 --> 1 NAME Ping /Lu/
 <-- 1|NAME|Y|Ping /Lu/ 
---> 2 GIVN Ping
-<-- 2|GIVN|N|Ping 
---> 2 SURN Lu
-<-- 2|SURN|N|Lu 
---> 2 _MARNM Lu
-<-- 2|_MARNM|N|Lu 
 --> 1 SEX F
 <-- 1|SEX|Y|F 
 --> 1 BIRT

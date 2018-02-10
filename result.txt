@@ -490,10 +490,6 @@
 <-- 1|MARR|Y
 --> 2 DATE 8 AUG 1957
 <-- 2|DATE|Y|8 AUG 1957 
---> 1 ANUL
-<-- 1|ANUL|N
---> 2 DATE 10 FEB 1995
-<-- 2|DATE|Y|10 FEB 1995 
 --> 1 _CURRENT Y
 <-- 1|_CURRENT|N|Y 
 --> 0 @F4@ FAM
@@ -568,10 +564,6 @@
 <-- 1|MARR|Y
 --> 2 DATE 12 MAR 1953
 <-- 2|DATE|Y|12 MAR 1953 
---> 1 ANUL
-<-- 1|ANUL|N
---> 2 DATE 5 FEB 1955
-<-- 2|DATE|Y|5 FEB 1955 
 --> 1 _CURRENT N
 <-- 1|_CURRENT|N|N 
 --> 0 @F9@ FAM
