@@ -82,8 +82,10 @@ def get_properties(readable, i):
             # passed in line i is the line w/ level 2
             # returned line i is the line w/ level 1
             dd[tag], i = get_data_of_property(readable, i)
-        else:
+        elif tag not in ['FAMC', 'FAMS', 'CHIL']:
             dd[tag] = args.strip('@\n ')
+        else:
+            dd[tag] = ','.join([dd[tag], args.strip('@\n ')])
         
     return dd, i - 1
 
@@ -136,18 +138,31 @@ def process_result(input_path):
             int(value['DEAT'].split('-')[0]) - int(value['BIRT'].split('-')[0]))
         alive = 'True' if 'DEAT' not in value else 'False'
         death = value['DEAT'] if 'DEAT' in value else 'NA'
-        child = ('{\'' + value['FAMC'] + '\'}') if 'FAMC' in value else 'NA'
-        spouse = ('{\'' + value['FAMS'] + '\'}') if 'FAMS' in value else 'NA'
+        child = ('{' + ', '.join([repr(s) for s in set(value['FAMC'].strip(',').split(','))]) + '}') if 'FAMC' in value else 'NA'
+        spouse = ('{' + ', '.join([repr(s) for s in set(value['FAMS'].strip(',').split(','))]) + '}') if 'FAMS' in value else 'NA'
 
-        individual_table.add_row(
-            [person_id, value['NAME'], value['SEX'], value['BIRT'], age, alive, death, child, spouse])
+        individual_table.add_row([person_id, value['NAME'], value['SEX'], value['BIRT'], age, alive, death, child, spouse])
 
+    print('Individuals')
     print(individual_table)
 
     family_table = PrettyTable(field_names=[
                                'ID', 'Married', 'Divorced', 'Husband ID', 'Husband Name', 'Wife ID', 'Wife Name', 'Children'])
     
     #TODO: family_table.add_row
+    for fam_id, value in family_dict.items():
+        married = 'True' if 'MARR' in value else 'False'
+        divorced = 'True' if 'DIV' in value else 'False'
+        husID = value['HUSB']
+        husName = individual_dict[husID]['NAME']
+        wifID = value['WIFE']
+        wifName = individual_dict[wifID]['NAME']
+        children = ('{' + ', '.join([repr(s) for s in set(value['CHIL'].strip(',').split(','))]) + '}') if 'CHIL' in value else 'NA'
+
+        family_table.add_row([fam_id, married, divorced, husID, husName, wifID, wifName, children])
+
+    print('Families')
+    print(family_table)
 
 
 process_result('./result.txt')
