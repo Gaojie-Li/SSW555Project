@@ -26,7 +26,7 @@ def parse_date(date_str):
     month = date[1]
     year = date[2]
 
-    return year + '-' + MONTH_LIB[month] + '-' + day
+    return year + '-' + MONTH_LIB[month] + '-' + '{:0>2d}'.format(int(day))
 
 # read level 2
 
@@ -151,8 +151,8 @@ def process_result(input_path):
     
     #TODO: family_table.add_row
     for fam_id, value in family_dict.items():
-        married = 'True' if 'MARR' in value else 'False'
-        divorced = 'True' if 'DIV' in value else 'False'
+        married = value['MARR'] if 'MARR' in value else 'NA'
+        divorced = value['DIV'] if 'DIV' in value else 'NA'
         husID = value['HUSB']
         husName = individual_dict[husID]['NAME']
         wifID = value['WIFE']
