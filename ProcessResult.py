@@ -10,7 +10,6 @@ THIS_YEAR = 2018
 TAG_W_EXTENSION = {'BIRT', 'DEAT', 'MARR', 'DIV'}
 
 
-
 def parse_line(line):
     items = line.strip('<-- \n').split('|')
     # print(items)
@@ -47,7 +46,7 @@ def get_data_of_property(readable, i):
             continue
 
         if level != '2':
-            break # return to parent level
+            break  # return to parent level
 
         if tag == 'DATE':
             date = parse_date(args)
@@ -76,7 +75,7 @@ def get_properties(readable, i):
 
         if level != '1':
             assert(level == '0')
-            break # level == 0
+            break  # level == 0
 
         if tag in TAG_W_EXTENSION:
             # passed in line i is the line w/ level 2
@@ -86,7 +85,7 @@ def get_properties(readable, i):
             dd[tag] = args.strip('@\n ')
         else:
             dd[tag] = ','.join([dd[tag], args.strip('@\n ')])
-        
+
     return dd, i - 1
 
 # read level 0
@@ -127,9 +126,10 @@ def process_result(input_path):
             family_dict[object_id], i = get_properties(readable, i)
         elif tag == 'INDI':
             individual_dict[object_id], i = get_properties(readable, i)
-        
+
     # read all family data
 
+    writable = open('output.txt', 'w')
     individual_table = PrettyTable(field_names=[
                                    'ID', 'Name', 'Gender', 'Birthday', 'Age', 'Alive', 'Death', 'Child', 'Spouse'])
 
@@ -138,17 +138,21 @@ def process_result(input_path):
             int(value['DEAT'].split('-')[0]) - int(value['BIRT'].split('-')[0]))
         alive = 'True' if 'DEAT' not in value else 'False'
         death = value['DEAT'] if 'DEAT' in value else 'NA'
-        child = ('{' + ', '.join([repr(s) for s in set(value['FAMC'].strip(',').split(','))]) + '}') if 'FAMC' in value else 'NA'
-        spouse = ('{' + ', '.join([repr(s) for s in set(value['FAMS'].strip(',').split(','))]) + '}') if 'FAMS' in value else 'NA'
+        child = ('{' + ', '.join([repr(s) for s in set(value['FAMC'].strip(
+            ',').split(','))]) + '}') if 'FAMC' in value else 'NA'
+        spouse = ('{' + ', '.join([repr(s) for s in set(
+            value['FAMS'].strip(',').split(','))]) + '}') if 'FAMS' in value else 'NA'
 
-        individual_table.add_row([person_id, value['NAME'], value['SEX'], value['BIRT'], age, alive, death, child, spouse])
+        individual_table.add_row(
+            [person_id, value['NAME'], value['SEX'], value['BIRT'], age, alive, death, child, spouse])
 
-    print('Individuals')
-    print(individual_table)
+    writable.write('Individuals\n')
+    # print(individual_table)
+    writable.write(str(individual_table))
 
     family_table = PrettyTable(field_names=[
                                'ID', 'Married', 'Divorced', 'Husband ID', 'Husband Name', 'Wife ID', 'Wife Name', 'Children'])
-    
+
     #TODO: family_table.add_row
     for fam_id, value in family_dict.items():
         married = value['MARR'] if 'MARR' in value else 'NA'
@@ -157,12 +161,15 @@ def process_result(input_path):
         husName = individual_dict[husID]['NAME']
         wifID = value['WIFE']
         wifName = individual_dict[wifID]['NAME']
-        children = ('{' + ', '.join([repr(s) for s in set(value['CHIL'].strip(',').split(','))]) + '}') if 'CHIL' in value else 'NA'
+        children = ('{' + ', '.join([repr(s) for s in set(
+            value['CHIL'].strip(',').split(','))]) + '}') if 'CHIL' in value else 'NA'
 
-        family_table.add_row([fam_id, married, divorced, husID, husName, wifID, wifName, children])
+        family_table.add_row(
+            [fam_id, married, divorced, husID, husName, wifID, wifName, children])
 
-    print('Families')
-    print(family_table)
+    writable.write('Families\n')
+    # print(family_table)
+    writable.write(str(family_table))
 
 
 process_result('./result.txt')
