@@ -1,6 +1,7 @@
 import os
 from prettytable import PrettyTable
 from collections import defaultdict
+from datetime import datetime
 
 MONTH_LIB = {'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05',
              'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'}
@@ -21,9 +22,27 @@ def parse_line(line):
 
 def parse_date(date_str):
     date = date_str.split(' ')
+
     day = date[0]
     month = date[1]
     year = date[2]
+
+    # print(date_str)
+    try:
+        iday = int(day)
+        imonth = int(MONTH_LIB[month])
+        iyear = int(year)
+    except ValueError:
+        print("ERROR: Date has got invalid day, month or year field! Please check the original data.")
+        iday = 1
+        imonth = 1
+        iyear = 9999
+
+    dt = datetime(iyear, imonth, iday).date()
+    nowd = datetime.now().date()
+    if dt > nowd:
+        print("ERROR: US01: DATE shall not after the current date!")
+        return 'INVALID_DATE'
 
     return year + '-' + MONTH_LIB[month] + '-' + '{:0>2d}'.format(int(day))
 
