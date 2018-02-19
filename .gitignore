@@ -1,2 +1,7 @@
 settings.json
 .vscode
+
+output.txt
+prettytable.py
+
+*.pyc
