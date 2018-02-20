@@ -74,6 +74,22 @@ def get_data_of_property(readable, i):
 
 # read level 1
 
+def check_marrdiv_date(dd):
+    if ('DIV' not in dd) or ('MARR' not in dd):
+        return -1 # non-checking context
+    
+    div_date = dd['DIV']
+    mar_date = dd['MARR']
+
+    div_ymd = (int(field) for field in div_date.split('-'))
+    mar_ymd = (int(field) for field in mar_date.split('-'))
+
+    if datetime(*div_ymd) < datetime(*mar_ymd):
+        print('ERROR: UC04: MARR.DATE shall not after DIV.DATE')
+        return 1
+    
+    return 0
+    
 
 def get_properties(readable, i):
     dd = defaultdict(str)
@@ -100,6 +116,11 @@ def get_properties(readable, i):
             # passed in line i is the line w/ level 2
             # returned line i is the line w/ level 1
             dd[tag], i = get_data_of_property(readable, i)
+
+            if 'DIV' == tag:
+                if check_marrdiv_date(dd) > 0:
+                    print("\tDetails: marriage={}, divorce={}".format(dd['MARR'], dd['DIV']))
+
         elif tag not in ['FAMC', 'FAMS', 'CHIL']:
             dd[tag] = args.strip('@\n ')
         else:

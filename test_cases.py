@@ -43,3 +43,41 @@ class TestUC01(unittest.TestCase):
         print('\n' + date_str + ':', dsc)
 
         self.assertTrue(self.fn(date_str) == 'INVALID_DATE')
+
+
+
+class TestUC04(unittest.TestCase):
+    def setUp(self):
+        from ProcessResult import check_marrdiv_date
+        self.fn = check_marrdiv_date
+
+    def tearDown(self):
+        pass
+
+    def test_UC04_no_marr(self):
+        dd = {'DIV':'2000-03-01'}
+        self.assertEqual(self.fn(dd), -1)
+
+    def test_UC04_no_div(self):
+        dd = {'MARR':'2000-03-01'}
+        self.assertEqual(self.fn(dd), -1)
+
+    def test_UC04_valid_date(self):
+        dd = {'MARR':'2000-03-01', 'DIV':'2000-03-02'}
+        self.assertEqual(self.fn(dd), 0)
+
+    def test_UC04_valid_date_same(self):
+        dd = {'MARR':'2000-03-01', 'DIV':'2000-03-01'}
+        self.assertEqual(self.fn(dd), 0)
+
+    def test_UC04_invalid_year(self):
+        dd = {'MARR':'2000-03-01', 'DIV':'1999-03-02'}
+        self.assertEqual(self.fn(dd), 1)
+
+    def test_UC04_invalid_day(self):
+        dd = {'MARR':'2000-03-02', 'DIV':'2000-03-01'}
+        self.assertEqual(self.fn(dd), 1)
+
+    def test_UC04_invalid_mon(self):
+        dd = {'MARR':'2000-03-01', 'DIV':'2000-02-02'}
+        self.assertEqual(self.fn(dd), 1)
