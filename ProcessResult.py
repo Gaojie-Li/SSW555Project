@@ -85,7 +85,7 @@ def check_marrdiv_date(dd):
     mar_ymd = (int(field) for field in mar_date.split('-'))
 
     if datetime(*div_ymd) < datetime(*mar_ymd):
-        print('ERROR: UC04: MARR.DATE shall not after DIV.DATE')
+        print('ERROR: US04: MARR.DATE shall not after DIV.DATE')
         return 1
     
     return 0
