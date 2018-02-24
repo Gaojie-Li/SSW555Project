@@ -215,4 +215,53 @@ def process_result(input_path):
     return individual_dict, family_dict
 
 
-process_result('./result.txt')
+# process_result('./result.txt')
+def birth_before_marriage(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+    if 'FAMS' not in indi_dict[indi_id]:
+        return 'The person has not married.'
+
+    birth_date = indi_dict[indi_id]['BIRT'].split('-')
+    fams_list = indi_dict[indi_id]['FAMS'].strip(',').split(',')
+
+    for fam in fams_list:
+        marry_date = fam_dict[fam]['MARR'].split('-')
+        if int(marry_date[0]) < int(birth_date[0]):
+            return False
+        if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) < int(birth_date[1]):
+            return False
+        if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) == int(birth_date[1]) and int(marry_date[0]) == int(birth_date[0]) and int(marry_date[2]) < int(birth_date[2]):
+            return False
+
+    return True
+
+
+def divorce_before_death(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type entered.'
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+    if 'FAMS' not in indi_dict[indi_id]:
+        return 'The target has not married yet.'
+    if 'DEAT' not in indi_dict[indi_id]:
+        return True
+
+    death_date = indi_dict[indi_id]['DEAT'].split('-')
+    fam_list = indi_dict[indi_id]['FAMS'].strip(',').split(',')
+
+    for fam_id in fam_list:
+        if 'DIV' not in fam_dict[fam_id]:
+            continue
+
+        divorce_date = fam_dict[fam_id]['DIV'].split('-')
+        if divorce_date[0] > death_date[0]:
+            return False
+        if divorce_date[0] == death_date[0] and divorce_date[1] > death_date[1]:
+            return False
+        if divorce_date[0] == death_date[0] and divorce_date[1] == death_date[1] and divorce_date[2] > death_date[2]:
+            return False
+
+    return True
