@@ -265,3 +265,65 @@ def divorce_before_death(indi_id, indi_dict, fam_dict):
             return False
 
     return True
+
+
+def birth_before_death(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if indi_id not in indi_dict:
+        return "The person you look up does not exist"
+
+    # The person has no specific birth date & death date
+    if 'BIRT' not in indi_dict[indi_id] and 'DEAT' not in indi_dict[indi_id]:
+        return None
+
+    # The format for the date is YYYY-mm-dd
+    birth_date = indi_dict[indi_id]['BIRT'].split('-')
+    # The person is stil alive
+    if 'DEAT' not in indi_dict[indi_id]:
+        return True
+
+    death_date = indi_dict[indi_id]['DEAT'].split('-')
+    if int(death_date[0]) < int(birth_date[0]):
+        return False
+
+    if int(death_date[0]) == int(birth_date[0]) and int(death_date[1]) < int(birth_date[1]):
+        return False
+
+    if int(death_date[0]) == int(birth_date[0]) and int(death_date[1]) == int(birth_date[1]) and int(death_date[2]) < int(birth_date[2]):
+        return False
+
+    return True
+
+
+def marriage_before_death(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if type(fam_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if indi_id not in indi_dict:
+        return "The person you look up does not exist"
+
+    if 'DEAT' not in indi_dict[indi_id]:
+        return True
+    if 'FAMS' not in indi_dict[indi_id]:
+        return True
+    death_date = indi_dict[indi_id]['DEAT'].split('-')
+    fams = indi_dict[indi_dict]['FAMS'].split(',')
+
+    marry_date = []     # ['YYYY-MM-dd', 'YYYY-MM-dd]
+
+    for fam in fams:
+        marry_date.append(fams[fam]['MARR'])
+    for m_date in marry_date:
+        marriage_date = marry_date.split('-')
+        if int(death_date[0]) < int(marriage_date[0]):
+            return False
+
+        if int(death_date[0]) == int(marriage_date[0]) and int(death_date[1]) < int(marriage[1]):
+            return False
+
+        if int(death_date[0]) == int(marriage_date[0]) and int(death_date[1]) == int(marriage_date[1]) and int(death_date[2]) < int(marriage_date[2]):
+            return False
+
+    return True
