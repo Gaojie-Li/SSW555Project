@@ -74,10 +74,11 @@ def get_data_of_property(readable, i):
 
 # read level 1
 
+
 def check_marrdiv_date(dd):
     if ('DIV' not in dd) or ('MARR' not in dd):
-        return -1 # non-checking context
-    
+        return -1  # non-checking context
+
     div_date = dd['DIV']
     mar_date = dd['MARR']
 
@@ -87,9 +88,9 @@ def check_marrdiv_date(dd):
     if datetime(*div_ymd) < datetime(*mar_ymd):
         print('ERROR: US04: MARR.DATE shall not after DIV.DATE')
         return 1
-    
+
     return 0
-    
+
 
 def get_properties(readable, i):
     dd = defaultdict(str)
@@ -119,7 +120,8 @@ def get_properties(readable, i):
 
             if 'DIV' == tag:
                 if check_marrdiv_date(dd) > 0:
-                    print("\tDetails: marriage={}, divorce={}".format(dd['MARR'], dd['DIV']))
+                    print("\tDetails: marriage={}, divorce={}".format(
+                        dd['MARR'], dd['DIV']))
 
         elif tag not in ['FAMC', 'FAMS', 'CHIL']:
             dd[tag] = args.strip('@\n ')
@@ -208,8 +210,9 @@ def process_result(input_path):
             [fam_id, married, divorced, husID, husName, wifID, wifName, children])
 
     writable.write('Families\n')
-    # print(family_table)
     writable.write(str(family_table))
+
+    return individual_dict, family_dict
 
 
 process_result('./result.txt')
