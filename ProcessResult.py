@@ -27,22 +27,22 @@ def parse_date(date_str):
     month = date[1]
     year = date[2]
 
-    # print(date_str)
-    try:
-        iday = int(day)
-        imonth = int(MONTH_LIB[month])
-        iyear = int(year)
-    except ValueError:
-        print("ERROR: Date has got invalid day, month or year field! Please check the original data.")
-        iday = 1
-        imonth = 1
-        iyear = 9999
+    # # print(date_str)
+    # try:
+    #     iday = int(day)
+    #     imonth = int(MONTH_LIB[month])
+    #     iyear = int(year)
+    # except ValueError:
+    #     print("ERROR: Date has got invalid day, month or year field! Please check the original data.")
+    #     iday = 1
+    #     imonth = 1
+    #     iyear = 9999
 
-    dt = datetime(iyear, imonth, iday).date()
-    nowd = datetime.now().date()
-    if dt > nowd:
-        print("ERROR: US01: DATE shall not after the current date!")
-        return 'INVALID_DATE'
+    # dt = datetime(iyear, imonth, iday).date()
+    # nowd = datetime.now().date()
+    # if dt > nowd:
+    #     print("ERROR: US01: DATE shall not after the current date!")
+    #     return 'INVALID_DATE'
 
     return year + '-' + MONTH_LIB[month] + '-' + '{:0>2d}'.format(int(day))
 
@@ -75,21 +75,21 @@ def get_data_of_property(readable, i):
 # read level 1
 
 
-def check_marrdiv_date(dd):
-    if ('DIV' not in dd) or ('MARR' not in dd):
-        return -1  # non-checking context
+# def check_marrdiv_date(dd):
+#     if ('DIV' not in dd) or ('MARR' not in dd):
+#         return -1  # non-checking context
 
-    div_date = dd['DIV']
-    mar_date = dd['MARR']
+#     div_date = dd['DIV']
+#     mar_date = dd['MARR']
 
-    div_ymd = (int(field) for field in div_date.split('-'))
-    mar_ymd = (int(field) for field in mar_date.split('-'))
+#     div_ymd = (int(field) for field in div_date.split('-'))
+#     mar_ymd = (int(field) for field in mar_date.split('-'))
 
-    if datetime(*div_ymd) < datetime(*mar_ymd):
-        print('ERROR: US04: MARR.DATE shall not after DIV.DATE')
-        return 1
+#     if datetime(*div_ymd) < datetime(*mar_ymd):
+#         print('ERROR: US04: MARR.DATE shall not after DIV.DATE')
+#         return 1
 
-    return 0
+#     return 0
 
 
 def get_properties(readable, i):
@@ -118,10 +118,10 @@ def get_properties(readable, i):
             # returned line i is the line w/ level 1
             dd[tag], i = get_data_of_property(readable, i)
 
-            if 'DIV' == tag:
-                if check_marrdiv_date(dd) > 0:
-                    print("\tDetails: marriage={}, divorce={}".format(
-                        dd['MARR'], dd['DIV']))
+            # if 'DIV' == tag:
+            #     if check_marrdiv_date(dd) > 0:
+            #         print("\tDetails: marriage={}, divorce={}".format(
+            #             dd['MARR'], dd['DIV']))
 
         elif tag not in ['FAMC', 'FAMS', 'CHIL']:
             dd[tag] = args.strip('@\n ')
@@ -309,7 +309,7 @@ def marriage_before_death(indi_id, indi_dict, fam_dict):
     if 'FAMS' not in indi_dict[indi_id]:
         return True
     death_date = indi_dict[indi_id]['DEAT'].split('-')
-    fams = indi_dict[indi_dict]['FAMS'].split(',')
+    fams = indi_dict[indi_id]['FAMS'].split(',')
 
     marry_date = []     # ['YYYY-MM-dd', 'YYYY-MM-dd]
 
@@ -327,3 +327,94 @@ def marriage_before_death(indi_id, indi_dict, fam_dict):
             return False
 
     return True
+
+
+def date_before_today(indi_id, indi_dict, fam_dict):
+    ''' US01: Dates before current date
+    '''
+    print("DJFIEJFIEJIFJIEJI")
+    if type(indi_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if type(fam_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+
+    nowd = datetime.now().date()
+
+    if 'BIRT' in indi_dict[indi_id]:
+        birth_date = indi_dict[indi_id]['BIRT'].split('-')
+
+        iyear = int(birth_date[0])
+        imonth = int(birth_date[1])
+        iday = int(birth_date[2])
+
+        dt = datetime(iyear, imonth, iday).date()
+        if dt > nowd:
+            print("ERROR: INDIVIDUAL: US01: {}: Birth date {} is after today!".format(indi_id, indi_dict[indi_id]['BIRT']))
+
+    if 'DEAT' in indi_dict[indi_id]:
+        death_date = indi_dict[indi_id]['DEAT'].split('-')
+        
+        iyear = int(death_date[0])
+        imonth = int(death_date[1])
+        iday = int(death_date[2])
+
+        dt = datetime(iyear, imonth, iday).date()
+        if dt > nowd:
+            print("ERROR: INDIVIDUAL: US01: {}: Death date {} is after today!".format(indi_id, indi_dict[indi_id]['DEAT']))
+    
+    # check Marry & Divorce dates
+    if 'FAMS' not in indi_dict[indi_id]:
+        return
+    
+    fams = indi_dict[indi_id]['FAMS'].strip(',').split(',')
+    for fam_id in fams:
+        if 'MARR' in fam_dict[fam_id]:
+            marr_date = fam_dict[fam_id]['MARR'].split('-')
+
+            iyear = int(marr_date[0])
+            imonth = int(marr_date[1])
+            iday = int(marr_date[2])
+
+            dt = datetime(iyear, imonth, iday).date()
+            if dt > nowd:
+                print("ERROR: INDIVIDUAL: US01: {}: Marriage date {} is after today!".format(fam_id, fam_dict[fam_id]['MARR']))
+        
+        if 'DIV' in fam_dict[fam_id]:
+            div_date = fam_dict[fam_id]['DIV'].split('-')
+
+            iyear = int(div_date[0])
+            imonth = int(div_date[1])
+            iday = int(div_date[2])
+
+            dt = datetime(iyear, imonth, iday).date()
+            if dt > nowd:
+                print("ERROR: INDIVIDUAL: US01: {}: Divorce date {} is after today!".format(fam_id, fam_dict[fam_id]['DIV']))
+
+
+def marriage_before_divorce(indi_id, indi_dict, fam_dict):
+    ''' US04: Marriage before divorce
+    '''
+
+    if type(indi_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if type(fam_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+    if 'FAMS' not in indi_dict[indi_id]:
+        return
+
+    fams = indi_dict[indi_id]['FAMS'].strip(',').split(',')
+
+    for fam_id in fams:
+        if 'DIV' not in fam_dict[fam_id] or 'MARR' not in fam_dict[fam_id]:
+            continue
+        
+        div_ymd = (int(field) for field in fam_dict[fam_id]['DIV'].split('-'))
+        mar_ymd = (int(field) for field in fam_dict[fam_id]['MARR'].split('-'))
+
+        if datetime(*div_ymd) < datetime(*mar_ymd):
+            print("ERROR: FAMILY: US04: {}: Divorce date {} is before marriage date {}!".format(fam_id, fam_dict[fam_id]['DIV'], fam_dict[fam_id]['MARR']))
+

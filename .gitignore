@@ -7,3 +7,6 @@ prettytable.py
 *.pyc
 
 .DS_Store
+
+ged_result.txt
+result.txt

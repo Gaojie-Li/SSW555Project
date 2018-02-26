@@ -5,8 +5,9 @@ import ProcessResult as pr
 
 def acceptance_test(indi_dict, fam_dict):
     # key: 1-6, value: pr.divorce_before_death
-    quiry_service = {3: pr.birth_before_death, 4: pr.marriage_before_death,
-                     5: pr.birth_before_marriage, 6: pr.divorce_before_death}
+    quiry_service = {1: pr.date_before_today, 2: pr.marriage_before_divorce
+                    , 3: pr.birth_before_death, 4: pr.marriage_before_death
+                    , 5: pr.birth_before_marriage, 6: pr.divorce_before_death}
     name = input(
         'Please input the name of the person you want to search (firstname lastname):')
     names = name.lower().split()
