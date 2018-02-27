@@ -3,31 +3,18 @@ import ProcessGED
 import ProcessResult as pr
 
 
-def acceptance_test(indi_dict, fam_dict):
-    # key: 1-6, value: pr.divorce_before_death
-    quiry_service = {1: pr.date_before_today, 2: pr.marriage_before_divorce
-                    , 3: pr.birth_before_death, 4: pr.marriage_before_death
-                    , 5: pr.birth_before_marriage, 6: pr.divorce_before_death}
-    name = input(
-        'Please input the name of the person you want to search (firstname lastname):')
-    names = name.lower().split()
-    name = names[0] + ' /' + names[1] + '/'
+def acceptance_test():
+    ProcessGED.process_ged('./tree.ged', './ged_result.txt')
+    indi_dict, fam_dict = pr.process_result('./ged_result.txt')
 
-    ids = []
-    for key, value in indi_dict.items():
-        if value['NAME'].lower() == name:
-            ids.append(key)
+# # key: 1-6, value: pr.divorce_before_death
+    quiry_service = {1: pr.date_before_today, 2: pr.birth_before_marriage, 3: pr.birth_before_death,
+                     4: pr.marriage_before_divorce, 5: pr.marriage_before_death, 6: pr.divorce_before_death}
 
-    if len(ids) == 0:
-        return 'Person doesn\'t exist in the database.'
-
-    test = input('\n1. Dates before current date\n2. Marriage before divorce\n3. Birth before death\n4. Marriage before death\n5. Birth before marriage\n6. Divorce before death\nPlease select the index of the item you want to test: ')
-
-    for ID in ids:
-        print(quiry_service[int(test)](ID, indi_dict, fam_dict))
+    for indi in indi_dict:
+        for test_index in range(1, 7):
+            quiry_service[test_index](indi, indi_dict, fam_dict)
 
 
-ProcessGED.process_ged('./tree.ged', './ged_result.txt')
-indi_dict, fam_dict = pr.process_result('./ged_result.txt')
-
-acceptance_test(indi_dict, fam_dict)
+# acceptance_test(indi_dict, fam_dict)
+acceptance_test()

@@ -171,7 +171,7 @@ def process_result(input_path):
 
     # read all family data
 
-    writable = open('output.txt', 'w')
+    # writable = open('output.txt', 'w')
     individual_table = PrettyTable(field_names=[
                                    'ID', 'Name', 'Gender', 'Birthday', 'Age', 'Alive', 'Death', 'Child', 'Spouse'])
 
@@ -188,9 +188,10 @@ def process_result(input_path):
         individual_table.add_row(
             [person_id, value['NAME'], value['SEX'], value['BIRT'], age, alive, death, child, spouse])
 
-    writable.write('Individuals\n')
-    # print(individual_table)
-    writable.write(str(individual_table))
+    # writable.write('Individuals\n')
+    print('Individuals')
+    print(individual_table)
+    # writable.write(str(individual_table))
 
     family_table = PrettyTable(field_names=[
                                'ID', 'Married', 'Divorced', 'Husband ID', 'Husband Name', 'Wife ID', 'Wife Name', 'Children'])
@@ -209,13 +210,14 @@ def process_result(input_path):
         family_table.add_row(
             [fam_id, married, divorced, husID, husName, wifID, wifName, children])
 
-    writable.write('Families\n')
-    writable.write(str(family_table))
+    # writable.write('Families\n')
+    print('Families')
+    # writable.write(str(family_table))
+    print(family_table)
 
     return individual_dict, family_dict
 
 
-# process_result('./result.txt')
 def birth_before_marriage(indi_id, indi_dict, fam_dict):
     if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
         return 'Invalid dictionary type.'
@@ -230,11 +232,14 @@ def birth_before_marriage(indi_id, indi_dict, fam_dict):
     for fam in fams_list:
         marry_date = fam_dict[fam]['MARR'].split('-')
         if int(marry_date[0]) < int(birth_date[0]):
-            return False
+            print("ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
+                indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR']))
         if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) < int(birth_date[1]):
-            return False
+            print("ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
+                indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR']))
         if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) == int(birth_date[1]) and int(marry_date[0]) == int(birth_date[0]) and int(marry_date[2]) < int(birth_date[2]):
-            return False
+            print("ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
+                indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR']))
 
     return True
 
@@ -258,11 +263,14 @@ def divorce_before_death(indi_id, indi_dict, fam_dict):
 
         divorce_date = fam_dict[fam_id]['DIV'].split('-')
         if divorce_date[0] > death_date[0]:
-            return False
+            print("ERROR: INDIVIDUAL: US06: {}: Divorce date {} is after death date {}!".format(
+                indi_id, fam_dict[fam_id]['DIV'], indi_dict[indi_id]['DEAT']))
         if divorce_date[0] == death_date[0] and divorce_date[1] > death_date[1]:
-            return False
+            print("ERROR: INDIVIDUAL: US06: {}: Divorce date {} is after death date {}!".format(
+                indi_id, fam_dict[fam_id]['DIV'], indi_dict[indi_id]['DEAT']))
         if divorce_date[0] == death_date[0] and divorce_date[1] == death_date[1] and divorce_date[2] > death_date[2]:
-            return False
+            print("ERROR: INDIVIDUAL: US06: {}: Divorce date {} is after death date {}!".format(
+                indi_id, fam_dict[fam_id]['DIV'], indi_dict[indi_id]['DEAT']))
 
     return True
 
@@ -285,13 +293,16 @@ def birth_before_death(indi_id, indi_dict, fam_dict):
 
     death_date = indi_dict[indi_id]['DEAT'].split('-')
     if int(death_date[0]) < int(birth_date[0]):
-        return False
+        print("ERROR: INDIVIDUAL: US03: {}: Birth date {} is after death date {}!".format(
+            indi_id, indi_dict[indi_id]['BIRT'], indi_dict[indi_id]['DEAT']))
 
     if int(death_date[0]) == int(birth_date[0]) and int(death_date[1]) < int(birth_date[1]):
-        return False
+        print("ERROR: INDIVIDUAL: US03: {}: Birth date {} is after death date {}!".format(
+            indi_id, indi_dict[indi_id]['BIRT'], indi_dict[indi_id]['DEAT']))
 
     if int(death_date[0]) == int(birth_date[0]) and int(death_date[1]) == int(birth_date[1]) and int(death_date[2]) < int(birth_date[2]):
-        return False
+        print("ERROR: INDIVIDUAL: US03: {}: Birth date {} is after death date {}!".format(
+            indi_id, indi_dict[indi_id]['BIRT'], indi_dict[indi_id]['DEAT']))
 
     return True
 
@@ -309,22 +320,26 @@ def marriage_before_death(indi_id, indi_dict, fam_dict):
     if 'FAMS' not in indi_dict[indi_id]:
         return True
     death_date = indi_dict[indi_id]['DEAT'].split('-')
-    fams = indi_dict[indi_id]['FAMS'].split(',')
+    fams = indi_dict[indi_id]['FAMS'].strip(',').split(',')
 
     marry_date = []     # ['YYYY-MM-dd', 'YYYY-MM-dd]
 
     for fam in fams:
-        marry_date.append(fams[fam]['MARR'])
-    for m_date in marry_date:
-        marriage_date = marry_date.split('-')
-        if int(death_date[0]) < int(marriage_date[0]):
-            return False
+        marry_date.append(fam_dict[fam]['MARR'])
 
-        if int(death_date[0]) == int(marriage_date[0]) and int(death_date[1]) < int(marriage[1]):
-            return False
+    for m_date in marry_date:
+        marriage_date = m_date.split('-')
+        if int(death_date[0]) < int(marriage_date[0]):
+            print("ERROR: INDIVIDUAL: US05: {}: Marriage date {} is after death date {}!".format(
+                indi_id, m_date, indi_dict[indi_id]['DEAT']))
+
+        if int(death_date[0]) == int(marriage_date[0]) and int(death_date[1]) < int(marriage_date[1]):
+            print("ERROR: INDIVIDUAL: US05: {}: Marriage date {} is after death date {}!".format(
+                indi_id, m_date, indi_dict[indi_id]['DEAT']))
 
         if int(death_date[0]) == int(marriage_date[0]) and int(death_date[1]) == int(marriage_date[1]) and int(death_date[2]) < int(marriage_date[2]):
-            return False
+            print("ERROR: INDIVIDUAL: US05: {}: Marriage date {} is after death date {}!".format(
+                indi_id, m_date, indi_dict[indi_id]['DEAT']))
 
     return True
 
@@ -332,7 +347,7 @@ def marriage_before_death(indi_id, indi_dict, fam_dict):
 def date_before_today(indi_id, indi_dict, fam_dict):
     ''' US01: Dates before current date
     '''
-    print("DJFIEJFIEJIFJIEJI")
+    # print("DJFIEJFIEJIFJIEJI")
     if type(indi_dict) != defaultdict:
         return "Only defaultdict is acceptable"
     if type(fam_dict) != defaultdict:
@@ -351,23 +366,25 @@ def date_before_today(indi_id, indi_dict, fam_dict):
 
         dt = datetime(iyear, imonth, iday).date()
         if dt > nowd:
-            print("ERROR: INDIVIDUAL: US01: {}: Birth date {} is after today!".format(indi_id, indi_dict[indi_id]['BIRT']))
+            print("ERROR: INDIVIDUAL: US01: {}: Birth date {} is after today!".format(
+                indi_id, indi_dict[indi_id]['BIRT']))
 
     if 'DEAT' in indi_dict[indi_id]:
         death_date = indi_dict[indi_id]['DEAT'].split('-')
-        
+
         iyear = int(death_date[0])
         imonth = int(death_date[1])
         iday = int(death_date[2])
 
         dt = datetime(iyear, imonth, iday).date()
         if dt > nowd:
-            print("ERROR: INDIVIDUAL: US01: {}: Death date {} is after today!".format(indi_id, indi_dict[indi_id]['DEAT']))
-    
+            print("ERROR: INDIVIDUAL: US01: {}: Death date {} is after today!".format(
+                indi_id, indi_dict[indi_id]['DEAT']))
+
     # check Marry & Divorce dates
     if 'FAMS' not in indi_dict[indi_id]:
         return
-    
+
     fams = indi_dict[indi_id]['FAMS'].strip(',').split(',')
     for fam_id in fams:
         if 'MARR' in fam_dict[fam_id]:
@@ -379,8 +396,9 @@ def date_before_today(indi_id, indi_dict, fam_dict):
 
             dt = datetime(iyear, imonth, iday).date()
             if dt > nowd:
-                print("ERROR: INDIVIDUAL: US01: {}: Marriage date {} is after today!".format(fam_id, fam_dict[fam_id]['MARR']))
-        
+                print("ERROR: FAMILY: US01: {} {}: Marriage date {} is after today!".format(
+                    indi_id, fam_id, fam_dict[fam_id]['MARR']))
+
         if 'DIV' in fam_dict[fam_id]:
             div_date = fam_dict[fam_id]['DIV'].split('-')
 
@@ -390,7 +408,8 @@ def date_before_today(indi_id, indi_dict, fam_dict):
 
             dt = datetime(iyear, imonth, iday).date()
             if dt > nowd:
-                print("ERROR: INDIVIDUAL: US01: {}: Divorce date {} is after today!".format(fam_id, fam_dict[fam_id]['DIV']))
+                print("ERROR: FAMILY: US01: {} {}: Divorce date {} is after today!".format(
+                    indi_id, fam_id, fam_dict[fam_id]['DIV']))
 
 
 def marriage_before_divorce(indi_id, indi_dict, fam_dict):
@@ -411,10 +430,10 @@ def marriage_before_divorce(indi_id, indi_dict, fam_dict):
     for fam_id in fams:
         if 'DIV' not in fam_dict[fam_id] or 'MARR' not in fam_dict[fam_id]:
             continue
-        
+
         div_ymd = (int(field) for field in fam_dict[fam_id]['DIV'].split('-'))
         mar_ymd = (int(field) for field in fam_dict[fam_id]['MARR'].split('-'))
 
         if datetime(*div_ymd) < datetime(*mar_ymd):
-            print("ERROR: FAMILY: US04: {}: Divorce date {} is before marriage date {}!".format(fam_id, fam_dict[fam_id]['DIV'], fam_dict[fam_id]['MARR']))
-
+            print("ERROR: FAMILY: US04: {} {}: Divorce date {} is before marriage date {}!".format(
+                indi_id, fam_id, fam_dict[fam_id]['DIV'], fam_dict[fam_id]['MARR']))
