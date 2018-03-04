@@ -169,52 +169,6 @@ def process_result(input_path):
         elif tag == 'INDI':
             individual_dict[object_id], i = get_properties(readable, i)
 
-    # read all family data
-
-    # writable = open('output.txt', 'w')
-    # individual_table = PrettyTable(field_names=[
-    #                                'ID', 'Name', 'Gender', 'Birthday', 'Age', 'Alive', 'Death', 'Child', 'Spouse'])
-
-    # for person_id, value in individual_dict.items():
-    #     age = (THIS_YEAR - int(value['BIRT'].split('-')[0])) if 'DEAT' not in value else (
-    #         int(value['DEAT'].split('-')[0]) - int(value['BIRT'].split('-')[0]))
-    #     alive = 'True' if 'DEAT' not in value else 'False'
-    #     death = value['DEAT'] if 'DEAT' in value else 'NA'
-    #     child = ('{' + ', '.join([repr(s) for s in set(value['FAMC'].strip(
-    #         ',').split(','))]) + '}') if 'FAMC' in value else 'NA'
-    #     spouse = ('{' + ', '.join([repr(s) for s in set(
-    #         value['FAMS'].strip(',').split(','))]) + '}') if 'FAMS' in value else 'NA'
-
-    #     individual_table.add_row(
-    #         [person_id, value['NAME'], value['SEX'], value['BIRT'], age, alive, death, child, spouse])
-
-    # writable.write('Individuals\n')
-    # print('Individuals')
-    # print(individual_table)
-    # writable.write(str(individual_table))
-
-    # family_table = PrettyTable(field_names=[
-    #                            'ID', 'Married', 'Divorced', 'Husband ID', 'Husband Name', 'Wife ID', 'Wife Name', 'Children'])
-
-    # #TODO: family_table.add_row
-    # for fam_id, value in family_dict.items():
-    #     married = value['MARR'] if 'MARR' in value else 'NA'
-    #     divorced = value['DIV'] if 'DIV' in value else 'NA'
-    #     husID = value['HUSB']
-    #     husName = individual_dict[husID]['NAME']
-    #     wifID = value['WIFE']
-    #     wifName = individual_dict[wifID]['NAME']
-    #     children = ('{' + ', '.join([repr(s) for s in set(
-    #         value['CHIL'].strip(',').split(','))]) + '}') if 'CHIL' in value else 'NA'
-
-    #     family_table.add_row(
-    #         [fam_id, married, divorced, husID, husName, wifID, wifName, children])
-
-    # writable.write('Families\n')
-    # print('Families')
-    # writable.write(str(family_table))
-    # print(family_table)
-
     return individual_dict, family_dict
 
 
