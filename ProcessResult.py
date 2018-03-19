@@ -4,7 +4,9 @@ from collections import defaultdict
 from datetime import datetime
 
 MONTH_LIB = {'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05',
-             'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'}
+             'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
+             '00': '00' # US41
+            }
 
 THIS_YEAR = 2018
 
@@ -21,28 +23,18 @@ def parse_line(line):
 
 
 def parse_date(date_str):
-    date = date_str.split(' ')
+    date = date_str.strip().split(' ')
 
+    if len(date) and len(date) < 3:
+        tmp_date = []
+        for _ in range(3 - len(date)):
+            tmp_date.append('00')
+        tmp_date.extend(date)
+        date = tmp_date
+        
     day = date[0]
     month = date[1]
     year = date[2]
-
-    # # print(date_str)
-    # try:
-    #     iday = int(day)
-    #     imonth = int(MONTH_LIB[month])
-    #     iyear = int(year)
-    # except ValueError:
-    #     print("ERROR: Date has got invalid day, month or year field! Please check the original data.")
-    #     iday = 1
-    #     imonth = 1
-    #     iyear = 9999
-
-    # dt = datetime(iyear, imonth, iday).date()
-    # nowd = datetime.now().date()
-    # if dt > nowd:
-    #     print("ERROR: US01: DATE shall not after the current date!")
-    #     return 'INVALID_DATE'
 
     return year + '-' + MONTH_LIB[month] + '-' + '{:0>2d}'.format(int(day))
 
@@ -75,23 +67,6 @@ def get_data_of_property(readable, i):
 # read level 1
 
 
-# def check_marrdiv_date(dd):
-#     if ('DIV' not in dd) or ('MARR' not in dd):
-#         return -1  # non-checking context
-
-#     div_date = dd['DIV']
-#     mar_date = dd['MARR']
-
-#     div_ymd = (int(field) for field in div_date.split('-'))
-#     mar_ymd = (int(field) for field in mar_date.split('-'))
-
-#     if datetime(*div_ymd) < datetime(*mar_ymd):
-#         print('ERROR: US04: MARR.DATE shall not after DIV.DATE')
-#         return 1
-
-#     return 0
-
-
 def get_properties(readable, i):
     dd = defaultdict(str)
 
@@ -117,11 +92,6 @@ def get_properties(readable, i):
             # passed in line i is the line w/ level 2
             # returned line i is the line w/ level 1
             dd[tag], i = get_data_of_property(readable, i)
-
-            # if 'DIV' == tag:
-            #     if check_marrdiv_date(dd) > 0:
-            #         print("\tDetails: marriage={}, divorce={}".format(
-            #             dd['MARR'], dd['DIV']))
 
         elif tag not in ['FAMC', 'FAMS', 'CHIL']:
             dd[tag] = args.strip('@\n ')
@@ -297,11 +267,13 @@ def marriage_before_death(indi_id, indi_dict, fam_dict):
 
     return True
 
+
 def is_after_today(date_list):
     iyear = int(date_list[0])
     imonth = int(date_list[1])
     iday = int(date_list[2])
-    return datetime(iyear, imonth, iday).date() > datetime.now().date()
+    return datetime(iyear, imonth if imonth != 0 else 1, iday if iday != 0 else 1).date() > datetime.now().date()
+
 
 def date_before_today(indi_id, indi_dict, fam_dict):
     ''' US01: Dates before current date
@@ -364,9 +336,35 @@ def marriage_before_divorce(indi_id, indi_dict, fam_dict):
         if 'DIV' not in fam_dict[fam_id] or 'MARR' not in fam_dict[fam_id]:
             continue
 
-        div_ymd = (int(field) for field in fam_dict[fam_id]['DIV'].split('-'))
-        mar_ymd = (int(field) for field in fam_dict[fam_id]['MARR'].split('-'))
+        div_ymd = ((int(field) if field != '00' else 1) for field in fam_dict[fam_id]['DIV'].split('-'))
+        mar_ymd = ((int(field) if field != '00' else 1) for field in fam_dict[fam_id]['MARR'].split('-'))
 
         if datetime(*div_ymd) < datetime(*mar_ymd):
             return "ERROR: FAMILY: US04: {} {}: Divorce date {} is before marriage date {}!".format(
                 indi_id, fam_id, fam_dict[fam_id]['DIV'], fam_dict[fam_id]['MARR'])
+
+
+def order_siblings_by_age(indi_dict, fam_dict):
+    ''' US28: Order siblings by age
+    '''
+    if type(indi_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+    if type(fam_dict) != defaultdict:
+        return "Only defaultdict is acceptable"
+
+    dd = defaultdict(list)
+
+    for fam_id in fam_dict:
+        children = fam_dict[fam_id].get('CHIL', '')
+
+        if '' == children:
+            children = ['NA']
+        else:
+            children = children.strip(',').split(',')
+            # for id in children:
+            #     print(indi_dict[id]['BIRT'])
+            children = sorted(children, key=lambda indi_id: datetime(*((int(ymd) if ymd != '00' else 1) for ymd in indi_dict[indi_id]['BIRT'].split('-'))))
+            
+        dd[fam_id].extend(children)
+    
+    return dd

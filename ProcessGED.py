@@ -38,8 +38,8 @@ def process_ged(input_path, output_path):
                 valid = False
 
             if tag == 'DATE':
-                # items[2]: day, items[3]: month, items[4]: year
-                if len(items) != 5 or items[2][0] == '0' or items[3] not in month_set or len(items[4]) != 4 or not items[4].isnumeric():
+                # US41: level DATE [[day ]month ]year
+                if len(items) < 3 or (len(items) == 4 and items[2] not in month_set) or not items[-1].isnumeric():
                     valid = False
 
             if tag == 'NAME':
