@@ -17,7 +17,8 @@ def acceptance_test():
 
     for person_id, value in indi_dict.items():
         birtd = value['BIRT'].split('-')
-        deatd = value['DEAT'].split('-') if 'DEAT' in value else ['00', '00', '00']
+        deatd = value['DEAT'].split(
+            '-') if 'DEAT' in value else ['00', '00', '00']
         for _ in range(2):
             if birtd[-1] == '00':
                 del birtd[-1]
@@ -25,7 +26,8 @@ def acceptance_test():
                 del deatd[-1]
 
         # print(birtd[0], deatd[0])
-        age = (THIS_YEAR - int(birtd[0])) if 'DEAT' not in value else (int(deatd[0]) - int(birtd[0]))
+        age = (
+            THIS_YEAR - int(birtd[0])) if 'DEAT' not in value else (int(deatd[0]) - int(birtd[0]))
         alive = 'True' if 'DEAT' not in value else 'False'
         death = '-'.join(deatd) if 'DEAT' in value else 'NA'
         child = ('{' + ', '.join([repr(s) for s in set(value['FAMC'].strip(
@@ -43,8 +45,10 @@ def acceptance_test():
                                'ID', 'Married', 'Divorced', 'Husband ID', 'Husband Name', 'Wife ID', 'Wife Name', 'Children'])
 
     for fam_id, value in fam_dict.items():
-        marrd = value['MARR'].split('-') if 'MARR' in value else ['00', '00', '00']
-        divod = value['DIV'].split('-') if 'DIV' in value else ['00', '00', '00']
+        marrd = value['MARR'].split(
+            '-') if 'MARR' in value else ['00', '00', '00']
+        divod = value['DIV'].split(
+            '-') if 'DIV' in value else ['00', '00', '00']
         for _ in range(2):
             if marrd[-1] == '00':
                 del marrd[-1]
@@ -68,24 +72,27 @@ def acceptance_test():
 
 # # key: 1-6, value: pr.divorce_before_death
     quiry_service = {1: pr.date_before_today, 2: pr.birth_before_marriage, 3: pr.birth_before_death,
-                     4: pr.marriage_before_divorce, 5: pr.marriage_before_death, 6: pr.divorce_before_death}
+                     4: pr.marriage_before_divorce, 5: pr.marriage_before_death, 6: pr.divorce_before_death,
+                     7: pr.birth_before_marriage_of_parents, 8: pr.birth_before_death_of_parents}
 
     for indi in indi_dict:
-        for test_index in range(1, 7):
+        for test_index in range(1, 9):
             result = quiry_service[test_index](indi, indi_dict, fam_dict)
             if result != True and result != None and result.startswith('ERROR'):
                 writable.write(result + '\n')
 
-    #US28
+    # US28
     ordered_siblings_table = PrettyTable(field_names=['Family ID', 'Children'])
     ordered_siblings_dict = pr.order_siblings_by_age(indi_dict, fam_dict)
 
     for fam_id in fam_dict:
-        ordered_siblings_table.add_row([fam_id, ', '.join(ordered_siblings_dict[fam_id])])
+        ordered_siblings_table.add_row(
+            [fam_id, ', '.join(ordered_siblings_dict[fam_id])])
 
     writable.write('US28: List siblings from older to younger:\n')
     writable.write(str(ordered_siblings_table) + '\n')
-    #end US28
+    # end US28
+
 
 # acceptance_test(indi_dict, fam_dict)
 acceptance_test()

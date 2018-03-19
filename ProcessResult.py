@@ -5,8 +5,8 @@ from datetime import datetime
 
 MONTH_LIB = {'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05',
              'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
-             '00': '00' # US41
-            }
+             '00': '00'  # US41
+             }
 
 THIS_YEAR = 2018
 
@@ -31,7 +31,7 @@ def parse_date(date_str):
             tmp_date.append('00')
         tmp_date.extend(date)
         date = tmp_date
-        
+
     day = date[0]
     month = date[1]
     year = date[2]
@@ -161,7 +161,7 @@ def birth_before_marriage(indi_id, indi_dict, fam_dict):
         if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) < int(birth_date[1]):
             return "ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
                 indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR'])
-        if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) == int(birth_date[1]) and int(marry_date[0]) == int(birth_date[0]) and int(marry_date[2]) < int(birth_date[2]):
+        if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) == int(birth_date[1]) and int(marry_date[2]) < int(birth_date[2]):
             return "ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
                 indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR'])
 
@@ -336,8 +336,10 @@ def marriage_before_divorce(indi_id, indi_dict, fam_dict):
         if 'DIV' not in fam_dict[fam_id] or 'MARR' not in fam_dict[fam_id]:
             continue
 
-        div_ymd = ((int(field) if field != '00' else 1) for field in fam_dict[fam_id]['DIV'].split('-'))
-        mar_ymd = ((int(field) if field != '00' else 1) for field in fam_dict[fam_id]['MARR'].split('-'))
+        div_ymd = ((int(field) if field != '00' else 1)
+                   for field in fam_dict[fam_id]['DIV'].split('-'))
+        mar_ymd = ((int(field) if field != '00' else 1)
+                   for field in fam_dict[fam_id]['MARR'].split('-'))
 
         if datetime(*div_ymd) < datetime(*mar_ymd):
             return "ERROR: FAMILY: US04: {} {}: Divorce date {} is before marriage date {}!".format(
@@ -363,8 +365,70 @@ def order_siblings_by_age(indi_dict, fam_dict):
             children = children.strip(',').split(',')
             # for id in children:
             #     print(indi_dict[id]['BIRT'])
-            children = sorted(children, key=lambda indi_id: datetime(*((int(ymd) if ymd != '00' else 1) for ymd in indi_dict[indi_id]['BIRT'].split('-'))))
-            
+            children = sorted(children, key=lambda indi_id: datetime(
+                *((int(ymd) if ymd != '00' else 1) for ymd in indi_dict[indi_id]['BIRT'].split('-'))))
+
         dd[fam_id].extend(children)
-    
+
     return dd
+
+
+""" US08 Birth before marriage of parents """
+
+
+def birth_before_marriage_of_parents(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+    if 'FAMC' not in indi_dict[indi_id]:
+        return 'The person is not child of any family.'
+
+    birth_date = indi_dict[indi_id]['BIRT'].split('-')
+    famc = indi_dict[indi_id]['FAMC'].strip(',')
+    marry_date = fam_dict[famc]['MARR'].split('-')
+
+    if int(marry_date[0]) > int(birth_date[0]):
+        return "ERROR: INDIVIDUAL: US08: {}: Birth date {} is before marriage date of their parents {}!".format(
+            indi_id, indi_dict[indi_id]['BIRT'], fam_dict[famc]['MARR'])
+    if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) > int(birth_date[1]):
+        return "ERROR: INDIVIDUAL: US08: {}: Birth date {} is before marriage date of their parents {}!".format(
+            indi_id, indi_dict[indi_id]['BIRT'], fam_dict[famc]['MARR'])
+    if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) == int(birth_date[1]) and int(marry_date[2]) > int(birth_date[2]):
+        return "ERROR: INDIVIDUAL: US08: {}: Birth date {} is before marriage date of their parents {}!".format(
+            indi_id, indi_dict[indi_id]['BIRT'], fam_dict[famc]['MARR'])
+
+    return True
+
+
+""" US09 Birth before death of parents """
+
+
+def birth_before_death_of_parents(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+    if 'FAMC' not in indi_dict[indi_id]:
+        return 'The person is not child of any family.'
+
+    birth_date = indi_dict[indi_id]['BIRT'].split('-')
+    famc = indi_dict[indi_id]['FAMC'].strip(',')
+
+    dates = [indi_dict[fam_dict[famc]['HUSB']]['DEAT'] if 'DEAT' in indi_dict[fam_dict[famc]['HUSB']] else "",
+             indi_dict[fam_dict[famc]['WIFE']]['DEAT'] if 'DEAT' in indi_dict[fam_dict[famc]['WIFE']] else ""]
+
+    for date in dates:
+        if date != "":
+            split_date = date.split('-')
+            if int(split_date[0]) < int(birth_date[0]):
+                return "ERROR: INDIVIDUAL: US09: {}: Birth date {} is after death date of his/her parents {}!".format(
+                    indi_id, indi_dict[indi_id]['BIRT'], date)
+            if int(split_date[0]) == int(birth_date[0]) and int(split_date[1]) < int(birth_date[1]):
+                return "ERROR: INDIVIDUAL: US09: {}: Birth date {} is after death date of his/her parents {}!".format(
+                    indi_id, indi_dict[indi_id]['BIRT'], date)
+            if int(split_date[0]) == int(birth_date[0]) and int(split_date[1]) == int(birth_date[1]) and int(split_date[2]) < int(birth_date[2]):
+                return "ERROR: INDIVIDUAL: US09: {}: Birth date {} is after death date of his/her parents {}!".format(
+                    indi_id, indi_dict[indi_id]['BIRT'], date)
+
+    return True
