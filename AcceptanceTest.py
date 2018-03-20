@@ -93,6 +93,26 @@ def acceptance_test():
     writable.write(str(ordered_siblings_table) + '\n')
     # end US28
 
+    # US29
+    list_deceased_table = PrettyTable(
+        field_names=['Individual ID', "Name", "Death Date"])
+    list_deceased_dict = pr.list_deceased(indi_dict)
+    for indi_id in list_deceased_dict:
+        list_deceased_table.add_row(
+            [indi_id, list_deceased_dict[indi_id][0].replace('/', ''), list_deceased_dict[indi_id][1]])
+    writable.write("US29: List Deceased: \n")
+    writable.write(str(list_deceased_table) + '\n')
+
+    # US31
+    list_living_single_table = PrettyTable(
+        field_names=['Individual ID', "Name", "Age", "Marriage State"])
+    list_living_single_dict = pr.list_living_single(indi_dict)
+    for indi_id in list_living_single_dict:
+        list_living_single_table.add_row(
+            [indi_id, list_living_single_dict[indi_id][0].replace('/', ''), list_living_single_dict[indi_id][1], "Single"])
+    writable.write("US31: List living single: \n")
+    writable.write(str(list_living_single_table) + '\n')
+
 
 # acceptance_test(indi_dict, fam_dict)
 acceptance_test()

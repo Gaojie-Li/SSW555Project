@@ -432,3 +432,42 @@ def birth_before_death_of_parents(indi_id, indi_dict, fam_dict):
                     indi_id, indi_dict[indi_id]['BIRT'], date)
 
     return True
+
+
+""" US29 List deceased """
+
+
+def list_deceased(indi_dict):
+    if type(indi_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    dd = defaultdict(list)
+    for indi_id in indi_dict:
+        if 'DEAT' in indi_dict[indi_id]:
+            detail = []
+            detail.append(indi_dict[indi_id]['NAME'])
+            detail.append(indi_dict[indi_id]['DEAT'])
+            dd[indi_id] = detail
+
+    return dd
+
+
+""" US31 list living single """
+
+
+def list_living_single(indi_dict):
+    if type(indi_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    dd = defaultdict(list)
+    cur_year = 2018
+
+    for indi_id in indi_dict:
+        if 'DEAT' not in indi_dict[indi_id] and 'FAMS' not in indi_dict[indi_id]:
+            date = indi_dict[indi_id]['BIRT'].split('-')
+            if(cur_year - int(date[0]) > 30):
+                detail = []
+                detail.append(indi_dict[indi_id]['NAME'])
+                detail.append(cur_year - int(date[0]))
+                dd[indi_id] = detail
+    return dd
