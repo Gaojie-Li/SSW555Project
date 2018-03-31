@@ -2,6 +2,7 @@ import os
 from prettytable import PrettyTable
 from collections import defaultdict
 from datetime import datetime
+from datetime import date
 
 MONTH_LIB = {'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05',
              'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
@@ -469,5 +470,90 @@ def list_living_single(indi_dict):
                 detail = []
                 detail.append(indi_dict[indi_id]['NAME'])
                 detail.append(cur_year - int(date[0]))
+                dd[indi_id] = detail
+    return dd
+
+
+""" US35 list recent births """
+
+
+def list_recent_births(indi_dict):
+    if type(indi_dict) != defaultdict:
+        return "Invalid dictionary type"
+    dd = defaultdict(list)
+    cur_year = 2018
+    cur_month = 3
+    cur_day = 31
+    cur_date = date(cur_year, cur_month, cur_day)
+    for indi_id in indi_dict:
+        birth_date = indi_dict[indi_id]['BIRT'].split('-')
+        birth_year = int(birth_date[0])
+
+        birth_month = 0
+        if birth_date[1].startswith('0'):
+            birth_month = int(birth_date[1][1:])
+        else:
+            birth_month = int(birth_date[1])
+
+        birth_day = 0
+        if birth_date[2].startswith('0'):
+            birth_day = int(birth_date[2][1:])
+        else:
+            birth_day = int(birth_date[2])
+
+        if birth_year == 0 or birth_year > cur_year or birth_month == 0 or birth_day == 0:
+            continue
+
+        d0 = date(birth_year, birth_month, birth_day)
+        delta = cur_date - d0
+
+        if delta.days <= 30:
+            detail = []
+            detail.append(indi_dict[indi_id]['NAME'])
+            detail.append(indi_dict[indi_id]['BIRT'])
+            detail.append(delta.days)
+            dd[indi_id] = detail
+    return dd
+
+
+""" US36 list recent deaths """
+
+
+def list_recent_deaths(indi_dict):
+    if type(indi_dict) != defaultdict:
+        return "Invalid dictionary type"
+    dd = defaultdict(list)
+    cur_year = 2018
+    cur_month = 3
+    cur_day = 31
+    cur_date = date(cur_year, cur_month, cur_day)
+    for indi_id in indi_dict:
+        if 'DEAT' in indi_dict[indi_id]:
+            death_date = indi_dict[indi_id]['DEAT'].split('-')
+            death_year = int(death_date[0])
+
+            death_month = 0
+            if death_date[1].startswith('0'):
+                death_month = int(death_date[1][1:])
+            else:
+                death_month = int(death_date[1])
+
+            death_day = 0
+            if death_date[2].startswith('0'):
+                death_day = int(death_date[2][1:])
+            else:
+                death_day = int(death_date[2])
+
+            if death_year == 0 or death_year > cur_year or death_month == 0 or death_day == 0:
+                continue
+
+            d0 = date(death_year, death_month, death_day)
+            delta = cur_date - d0
+
+            if delta.days <= 30:
+                detail = []
+                detail.append(indi_dict[indi_id]['NAME'])
+                detail.append(indi_dict[indi_id]['DEAT'])
+                detail.append(delta.days)
                 dd[indi_id] = detail
     return dd

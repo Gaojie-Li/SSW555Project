@@ -9,6 +9,7 @@ THIS_YEAR = 2018
 def acceptance_test():
     ProcessGED.process_ged('./tree.ged', './ged_result.txt')
     indi_dict, fam_dict = pr.process_result('./ged_result.txt')
+    # print(indi_dict)
 
     writable = open('TestResult.txt', 'w')
 
@@ -89,7 +90,7 @@ def acceptance_test():
         ordered_siblings_table.add_row(
             [fam_id, ', '.join(ordered_siblings_dict[fam_id])])
 
-    writable.write('US28: List siblings from older to younger:\n')
+    writable.write('\n' + 'US28: List siblings from older to younger:\n')
     writable.write(str(ordered_siblings_table) + '\n')
     # end US28
 
@@ -100,7 +101,7 @@ def acceptance_test():
     for indi_id in list_deceased_dict:
         list_deceased_table.add_row(
             [indi_id, list_deceased_dict[indi_id][0].replace('/', ''), list_deceased_dict[indi_id][1]])
-    writable.write("US29: List Deceased: \n")
+    writable.write('\n' + "US29: List Deceased: \n")
     writable.write(str(list_deceased_table) + '\n')
 
     # US31
@@ -110,8 +111,29 @@ def acceptance_test():
     for indi_id in list_living_single_dict:
         list_living_single_table.add_row(
             [indi_id, list_living_single_dict[indi_id][0].replace('/', ''), list_living_single_dict[indi_id][1], "Single"])
-    writable.write("US31: List living single: \n")
+    writable.write('\n' + "US31: List living single: \n")
     writable.write(str(list_living_single_table) + '\n')
+
+    """ US35 List recent births """
+    list_recent_births_table = PrettyTable(
+        field_names=['Individual ID', 'Name', 'Birth_Date', 'Born before'])
+    list_recent_births_dict = pr.list_recent_births(indi_dict)
+    print(list_recent_births_dict)
+    for indi_id in list_recent_births_dict:
+        list_recent_births_table.add_row([indi_id, list_recent_births_dict[indi_id][0].replace(
+            '/', ''), list_recent_births_dict[indi_id][1], str(list_recent_births_dict[indi_id][2]) + ' days'])
+    writable.write('\n' + "US35: List Recent Births: \n")
+    writable.write(str(list_recent_births_table) + '\n')
+
+    """ US36 List recent deaths """
+    list_recent_deaths_table = PrettyTable(
+        field_names=['Individual ID', 'Name', 'Birth_Date', 'Died before'])
+    list_recent_deaths_dict = pr.list_recent_deaths(indi_dict)
+    for indi_id in list_recent_deaths_dict:
+        list_recent_deaths_table.add_row([indi_id, list_recent_deaths_dict[indi_id][0].replace(
+            '/', ''), list_recent_deaths_dict[indi_id][1], str(list_recent_deaths_dict[indi_id][2]) + ' days'])
+    writable.write('\n' + "US36: List Recent Deaths: \n")
+    writable.write(str(list_recent_deaths_table) + '\n')
 
 
 # acceptance_test(indi_dict, fam_dict)
