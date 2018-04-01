@@ -143,6 +143,20 @@ def process_result(input_path):
     return individual_dict, family_dict
 
 
+""" Helper function to find relationship between two dates """
+
+
+def is_before(date1, date2):
+    if int(date1[0]) < int(date2[0]):
+        return True
+    if int(date1[0]) == int(date2[0]) and int(date1[1]) < int(date2[1]):
+        return True
+    if int(date1[0]) == int(date2[0]) and int(date1[1]) == int(date2[1]) and int(date1[2]) < int(date2[2]):
+        return True
+
+    return False
+
+
 def birth_before_marriage(indi_id, indi_dict, fam_dict):
     if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
         return 'Invalid dictionary type.'
@@ -156,13 +170,7 @@ def birth_before_marriage(indi_id, indi_dict, fam_dict):
 
     for fam in fams_list:
         marry_date = fam_dict[fam]['MARR'].split('-')
-        if int(marry_date[0]) < int(birth_date[0]):
-            return "ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
-                indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR'])
-        if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) < int(birth_date[1]):
-            return "ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
-                indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR'])
-        if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) == int(birth_date[1]) and int(marry_date[2]) < int(birth_date[2]):
+        if is_before(marry_date, birth_date):
             return "ERROR: INDIVIDUAL: US02: {}: Birth date {} is after marriage date {}!".format(
                 indi_id, indi_dict[indi_id]['BIRT'], fam_dict[fam]['MARR'])
 
@@ -187,13 +195,7 @@ def divorce_before_death(indi_id, indi_dict, fam_dict):
             continue
 
         divorce_date = fam_dict[fam_id]['DIV'].split('-')
-        if divorce_date[0] > death_date[0]:
-            return "ERROR: INDIVIDUAL: US06: {}: Divorce date {} is after death date {}!".format(
-                indi_id, fam_dict[fam_id]['DIV'], indi_dict[indi_id]['DEAT'])
-        if divorce_date[0] == death_date[0] and divorce_date[1] > death_date[1]:
-            return "ERROR: INDIVIDUAL: US06: {}: Divorce date {} is after death date {}!".format(
-                indi_id, fam_dict[fam_id]['DIV'], indi_dict[indi_id]['DEAT'])
-        if divorce_date[0] == death_date[0] and divorce_date[1] == death_date[1] and divorce_date[2] > death_date[2]:
+        if is_before(death_date, divorce_date):
             return "ERROR: INDIVIDUAL: US06: {}: Divorce date {} is after death date {}!".format(
                 indi_id, fam_dict[fam_id]['DIV'], indi_dict[indi_id]['DEAT'])
 
@@ -217,15 +219,7 @@ def birth_before_death(indi_id, indi_dict, fam_dict):
         return True
 
     death_date = indi_dict[indi_id]['DEAT'].split('-')
-    if int(death_date[0]) < int(birth_date[0]):
-        return "ERROR: INDIVIDUAL: US03: {}: Birth date {} is after death date {}!".format(
-            indi_id, indi_dict[indi_id]['BIRT'], indi_dict[indi_id]['DEAT'])
-
-    if int(death_date[0]) == int(birth_date[0]) and int(death_date[1]) < int(birth_date[1]):
-        return "ERROR: INDIVIDUAL: US03: {}: Birth date {} is after death date {}!".format(
-            indi_id, indi_dict[indi_id]['BIRT'], indi_dict[indi_id]['DEAT'])
-
-    if int(death_date[0]) == int(birth_date[0]) and int(death_date[1]) == int(birth_date[1]) and int(death_date[2]) < int(birth_date[2]):
+    if is_before(death_date, birth_date):
         return "ERROR: INDIVIDUAL: US03: {}: Birth date {} is after death date {}!".format(
             indi_id, indi_dict[indi_id]['BIRT'], indi_dict[indi_id]['DEAT'])
 
@@ -254,15 +248,7 @@ def marriage_before_death(indi_id, indi_dict, fam_dict):
 
     for m_date in marry_date:
         marriage_date = m_date.split('-')
-        if int(death_date[0]) < int(marriage_date[0]):
-            return "ERROR: INDIVIDUAL: US05: {}: Marriage date {} is after death date {}!".format(
-                indi_id, m_date, indi_dict[indi_id]['DEAT'])
-
-        if int(death_date[0]) == int(marriage_date[0]) and int(death_date[1]) < int(marriage_date[1]):
-            return "ERROR: INDIVIDUAL: US05: {}: Marriage date {} is after death date {}!".format(
-                indi_id, m_date, indi_dict[indi_id]['DEAT'])
-
-        if int(death_date[0]) == int(marriage_date[0]) and int(death_date[1]) == int(marriage_date[1]) and int(death_date[2]) < int(marriage_date[2]):
+        if is_before(death_date, marriage_date):
             return "ERROR: INDIVIDUAL: US05: {}: Marriage date {} is after death date {}!".format(
                 indi_id, m_date, indi_dict[indi_id]['DEAT'])
 
@@ -389,13 +375,7 @@ def birth_before_marriage_of_parents(indi_id, indi_dict, fam_dict):
     famc = indi_dict[indi_id]['FAMC'].strip(',')
     marry_date = fam_dict[famc]['MARR'].split('-')
 
-    if int(marry_date[0]) > int(birth_date[0]):
-        return "ERROR: INDIVIDUAL: US08: {}: Birth date {} is before marriage date of their parents {}!".format(
-            indi_id, indi_dict[indi_id]['BIRT'], fam_dict[famc]['MARR'])
-    if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) > int(birth_date[1]):
-        return "ERROR: INDIVIDUAL: US08: {}: Birth date {} is before marriage date of their parents {}!".format(
-            indi_id, indi_dict[indi_id]['BIRT'], fam_dict[famc]['MARR'])
-    if int(marry_date[0]) == int(birth_date[0]) and int(marry_date[1]) == int(birth_date[1]) and int(marry_date[2]) > int(birth_date[2]):
+    if is_before(birth_date, marry_date):
         return "ERROR: INDIVIDUAL: US08: {}: Birth date {} is before marriage date of their parents {}!".format(
             indi_id, indi_dict[indi_id]['BIRT'], fam_dict[famc]['MARR'])
 
@@ -422,13 +402,7 @@ def birth_before_death_of_parents(indi_id, indi_dict, fam_dict):
     for date in dates:
         if date != "":
             split_date = date.split('-')
-            if int(split_date[0]) < int(birth_date[0]):
-                return "ERROR: INDIVIDUAL: US09: {}: Birth date {} is after death date of his/her parents {}!".format(
-                    indi_id, indi_dict[indi_id]['BIRT'], date)
-            if int(split_date[0]) == int(birth_date[0]) and int(split_date[1]) < int(birth_date[1]):
-                return "ERROR: INDIVIDUAL: US09: {}: Birth date {} is after death date of his/her parents {}!".format(
-                    indi_id, indi_dict[indi_id]['BIRT'], date)
-            if int(split_date[0]) == int(birth_date[0]) and int(split_date[1]) == int(birth_date[1]) and int(split_date[2]) < int(birth_date[2]):
+            if is_before(split_date, birth_date):
                 return "ERROR: INDIVIDUAL: US09: {}: Birth date {} is after death date of his/her parents {}!".format(
                     indi_id, indi_dict[indi_id]['BIRT'], date)
 
@@ -579,16 +553,17 @@ def large_age_diffs(indi_dict, fam_dict):
         # adjust all omitted fields of partial dates so that we can use datetime() to compare them:
         for i in range(2):
             if husBirt[2-i] * wifBirt[2-i] * marr_date[2-i] == 0:
-                husBirt[2-i] = wifBirt[2-i] = marr_date[2-i] = 1 # default month and/or day
+                # default month and/or day
+                husBirt[2-i] = wifBirt[2-i] = marr_date[2-i] = 1
 
         husAge = datetime(*marr_date) - datetime(*husBirt)
         wifAge = datetime(*marr_date) - datetime(*wifBirt)
 
         if husAge >= wifAge * 2 or wifAge >= husAge * 2:
             res.append(fam_id)
-        
+
     return res
-    
+
 
 def siblings_spacing(indi_dict, fam_dict):
     ''' US13: Siblings spacing
@@ -600,8 +575,9 @@ def siblings_spacing(indi_dict, fam_dict):
         children = fam_dict[fam_id]['CHIL'].strip(',').split(',')
         coll = []
         for chil_id in children:
-            e = [int(ymd) for ymd in indi_dict[chil_id]['BIRT'].split('-') if int(ymd) != 0]
-            if len(e) == 3: # to simplify, only check full dates!
+            e = [int(ymd) for ymd in indi_dict[chil_id]
+                 ['BIRT'].split('-') if int(ymd) != 0]
+            if len(e) == 3:  # to simplify, only check full dates!
                 coll.append(datetime(*e))
 
         if len(coll) == 0:
@@ -624,3 +600,56 @@ def siblings_spacing(indi_dict, fam_dict):
             last_within_2d = i
 
     return True
+
+
+""" US 11: No Bigamy"""
+
+
+def no_bigamy(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+    if 'FAMS' not in indi_dict[indi_id]:
+        return True
+
+    marriage_dates = []
+    divorce_dates = []
+    fams = indi_dict[indi_id]['FAMS'].strip(',').split(',')
+    if len(fams) < 2:
+        return True
+
+    for fam in fams:
+        marriage_dates.append(fam_dict[fam]['MARR'])
+        divorce_dates.append(
+            fam_dict[fam]['DIV'] if 'DIV' in fam_dict[fam] else '9999-99-99')
+
+    for i in range(len(marriage_dates)):
+        for j in range(len(marriage_dates)):
+            if j == i:
+                continue
+            if is_before(marriage_dates[i].split('-'), marriage_dates[j].split('-')):
+                if is_before(marriage_dates[j].split('-'), divorce_dates[i].split('-')):
+                    return "ERROR: FAMILY: US11: {} is having a bigamy in {} and {}!".format(
+                        indi_id, fams[i], fams[j])
+            elif is_before(marriage_dates[j].split('-'), marriage_dates[i].split('-')):
+                if is_before(marriage_dates[i].split('-'), divorce_dates[j].split('-')):
+                    return "ERROR: FAMILY: US11: {} is having a bigamy in {} and {}!".format(
+                        indi_id, fams[i], fams[j])
+
+    return True
+
+""" US 30: List Living Married """
+
+def list_living_married(indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    result = []
+    for indi, value in indi_dict.items():
+        if 'DEAT' in value or 'FAMS' not in value:
+            continue
+        result.append(indi)
+    
+    return result
+        

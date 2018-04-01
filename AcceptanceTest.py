@@ -74,10 +74,10 @@ def acceptance_test():
 # # key: 1-6, value: pr.divorce_before_death
     quiry_service = {1: pr.date_before_today, 2: pr.birth_before_marriage, 3: pr.birth_before_death,
                      4: pr.marriage_before_divorce, 5: pr.marriage_before_death, 6: pr.divorce_before_death,
-                     7: pr.birth_before_marriage_of_parents, 8: pr.birth_before_death_of_parents}
+                     7: pr.birth_before_marriage_of_parents, 8: pr.birth_before_death_of_parents, 9: pr.no_bigamy}
 
     for indi in indi_dict:
-        for test_index in range(1, 9):
+        for test_index in range(1, 10):
             result = quiry_service[test_index](indi, indi_dict, fam_dict)
             if result != True and result != None and result.startswith('ERROR'):
                 writable.write(result + '\n')
@@ -118,7 +118,7 @@ def acceptance_test():
     list_recent_births_table = PrettyTable(
         field_names=['Individual ID', 'Name', 'Birth_Date', 'Born before'])
     list_recent_births_dict = pr.list_recent_births(indi_dict)
-    print(list_recent_births_dict)
+    # print(list_recent_births_dict)
     for indi_id in list_recent_births_dict:
         list_recent_births_table.add_row([indi_id, list_recent_births_dict[indi_id][0].replace(
             '/', ''), list_recent_births_dict[indi_id][1], str(list_recent_births_dict[indi_id][2]) + ' days'])
@@ -143,6 +143,14 @@ def acceptance_test():
     res_us13 = pr.siblings_spacing(indi_dict, fam_dict)
     if res_us13 != True:
         writable.write(res_us13 + '\n')
+
+    ''' US30: List Living Married '''
+    res_us30 = pr.list_living_married(indi_dict, fam_dict)
+    list_living_married = PrettyTable(field_names=['Individual ID', 'Name'])
+    for res in res_us30:
+        list_living_married.add_row([res, indi_dict[res]['NAME']])
+    writable.write('\n' + 'US30: List Living Married: \n')
+    writable.write(str(list_living_married) + '\n')
 
 
 # acceptance_test(indi_dict, fam_dict)
