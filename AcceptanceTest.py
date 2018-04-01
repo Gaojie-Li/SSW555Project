@@ -135,6 +135,15 @@ def acceptance_test():
     writable.write('\n' + "US36: List Recent Deaths: \n")
     writable.write(str(list_recent_deaths_table) + '\n')
 
+    ''' US34: List large age differences '''
+    writable.write('\n' + 'US34: Family spouses who have large age gaps:\n\t')
+    writable.write(', '.join(pr.large_age_diffs(indi_dict, fam_dict)) + '\n\n')
+
+    ''' US13: Siblings spacing '''
+    res_us13 = pr.siblings_spacing(indi_dict, fam_dict)
+    if res_us13 != True:
+        writable.write(res_us13 + '\n')
+
 
 # acceptance_test(indi_dict, fam_dict)
 acceptance_test()
