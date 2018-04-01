@@ -557,3 +557,70 @@ def list_recent_deaths(indi_dict):
                 detail.append(delta.days)
                 dd[indi_id] = detail
     return dd
+
+
+def large_age_diffs(indi_dict, fam_dict):
+    ''' US34: List large age differences
+    '''
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type'
+
+    res = []
+
+    for fam_id, value in fam_dict.items():
+        husID = value['HUSB']
+        husName = indi_dict[husID]['NAME']
+        wifID = value['WIFE']
+        wifName = indi_dict[wifID]['NAME']
+
+        husBirt = [int(ymd) for ymd in indi_dict[husID]['BIRT'].split('-')]
+        wifBirt = [int(ymd) for ymd in indi_dict[wifID]['BIRT'].split('-')]
+        marr_date = [int(ymd) for ymd in fam_dict[fam_id]['MARR'].split('-')]
+        # adjust all omitted fields of partial dates so that we can use datetime() to compare them:
+        for i in range(2):
+            if husBirt[2-i] * wifBirt[2-i] * marr_date[2-i] == 0:
+                husBirt[2-i] = wifBirt[2-i] = marr_date[2-i] = 1 # default month and/or day
+
+        husAge = datetime(*marr_date) - datetime(*husBirt)
+        wifAge = datetime(*marr_date) - datetime(*wifBirt)
+
+        if husAge >= wifAge * 2 or wifAge >= husAge * 2:
+            res.append(fam_id)
+        
+    return res
+    
+
+def siblings_spacing(indi_dict, fam_dict):
+    ''' US13: Siblings spacing
+    '''
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type'
+
+    for fam_id in fam_dict:
+        children = fam_dict[fam_id]['CHIL'].strip(',').split(',')
+        coll = []
+        for chil_id in children:
+            e = [int(ymd) for ymd in indi_dict[chil_id]['BIRT'].split('-') if int(ymd) != 0]
+            if len(e) == 3: # to simplify, only check full dates!
+                coll.append(datetime(*e))
+
+        if len(coll) == 0:
+            continue
+
+        coll = sorted(coll)
+        cmp_8m_base = coll[0]
+        last_within_2d = 0
+        from datetime import timedelta
+
+        for i in range(len(coll)):
+            if coll[i] - cmp_8m_base <= timedelta(days=2):
+                pass
+            elif coll[i] - coll[last_within_2d] >= timedelta(days=8*30+4):
+                cmp_8m_base = coll[i]
+            else:
+                return "ERROR: FAMILY: US13: {}: A child's birth date {} is ill-spacing with previous child's birth date {}!".format(
+                    fam_id, coll[i], coll[last_within_2d])
+
+            last_within_2d = i
+
+    return True
