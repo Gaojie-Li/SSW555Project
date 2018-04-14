@@ -9,7 +9,9 @@ THIS_YEAR = 2018
 def acceptance_test():
     ProcessGED.process_ged('./tree.ged', './ged_result.txt')
     indi_dict, fam_dict = pr.process_result('./ged_result.txt')
-    # print(indi_dict)
+    print(indi_dict)
+    print('\n')
+    print(fam_dict)
 
     writable = open('TestResult.txt', 'w')
 
@@ -74,10 +76,11 @@ def acceptance_test():
 # # key: 1-6, value: pr.divorce_before_death
     quiry_service = {1: pr.date_before_today, 2: pr.birth_before_marriage, 3: pr.birth_before_death,
                      4: pr.marriage_before_divorce, 5: pr.marriage_before_death, 6: pr.divorce_before_death,
-                     7: pr.birth_before_marriage_of_parents, 8: pr.birth_before_death_of_parents, 9: pr.no_bigamy}
+                     7: pr.birth_before_marriage_of_parents, 8: pr.birth_before_death_of_parents, 9: pr.no_bigamy,
+                     10: pr.parent_not_too_old, 11: pr.unique_name_and_birth_date}
 
     for indi in indi_dict:
-        for test_index in range(1, 10):
+        for test_index in range(1, 12):
             result = quiry_service[test_index](indi, indi_dict, fam_dict)
             if result != True and result != None and result.startswith('ERROR'):
                 writable.write(result + '\n')

@@ -3,6 +3,7 @@ from prettytable import PrettyTable
 from collections import defaultdict
 from datetime import datetime
 from datetime import date
+from collections import deque
 
 MONTH_LIB = {'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05',
              'JUN': '06', 'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
@@ -552,9 +553,9 @@ def large_age_diffs(indi_dict, fam_dict):
         marr_date = [int(ymd) for ymd in fam_dict[fam_id]['MARR'].split('-')]
         # adjust all omitted fields of partial dates so that we can use datetime() to compare them:
         for i in range(2):
-            if husBirt[2-i] * wifBirt[2-i] * marr_date[2-i] == 0:
+            if husBirt[2 - i] * wifBirt[2 - i] * marr_date[2 - i] == 0:
                 # default month and/or day
-                husBirt[2-i] = wifBirt[2-i] = marr_date[2-i] = 1
+                husBirt[2 - i] = wifBirt[2 - i] = marr_date[2 - i] = 1
 
         husAge = datetime(*marr_date) - datetime(*husBirt)
         wifAge = datetime(*marr_date) - datetime(*wifBirt)
@@ -591,7 +592,7 @@ def siblings_spacing(indi_dict, fam_dict):
         for i in range(len(coll)):
             if coll[i] - cmp_8m_base <= timedelta(days=2):
                 pass
-            elif coll[i] - coll[last_within_2d] >= timedelta(days=8*30+4):
+            elif coll[i] - coll[last_within_2d] >= timedelta(days=8 * 30 + 4):
                 cmp_8m_base = coll[i]
             else:
                 return "ERROR: FAMILY: US13: {}: A child's birth date {} is ill-spacing with previous child's birth date {}!".format(
@@ -639,7 +640,9 @@ def no_bigamy(indi_id, indi_dict, fam_dict):
 
     return True
 
+
 """ US 30: List Living Married """
+
 
 def list_living_married(indi_dict, fam_dict):
     if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
@@ -650,6 +653,47 @@ def list_living_married(indi_dict, fam_dict):
         if 'DEAT' in value or 'FAMS' not in value:
             continue
         result.append(indi)
-    
+
     return result
-        
+
+
+""" US12: Parents not too old """
+
+
+def parent_not_too_old(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+
+    indi_birth = indi_dict[indi_id]['BIRT'].strip().split('-')
+
+    if 'FAMC' in indi_dict[indi_id]:
+        fam_id = indi_dict[indi_id]['FAMC'].strip(',')
+        husb_id = fam_dict[fam_id]['HUSB']
+        wife_id = fam_dict[fam_id]['WIFE']
+        husb_birth = indi_dict[husb_id]['BIRT'].strip().split('-')
+        wife_birth = indi_dict[wife_id]['BIRT'].strip().split('-')
+        if (int(indi_birth[0]) - int(husb_birth[0])) > 80 or (int(indi_birth[0]) - int(wife_birth[0])) > 60:
+            return 'ERROR: INDIVIDUAL: US12: Parens of {} are too old...'.format(indi_id)
+
+    return True
+
+
+""" US23: Unique name and birth date """
+
+
+def unique_name_and_birth_date(indi_id, indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    if indi_id not in indi_dict:
+        return 'Person doesn\'t exist in the database.'
+
+    for indi in indi_dict:
+        if indi != indi_id:
+            if indi_dict[indi_id]['NAME'] == indi_dict[indi]['NAME'] and indi_dict[indi_id]['BIRT'] == indi_dict[indi]['BIRT']:
+                return 'ERROR: INDIVIDUAL: US23: {} is the same person as {}'.format(indi_id, indi)
+
+    return True
