@@ -152,6 +152,22 @@ def acceptance_test():
     writable.write('\n' + 'US30: List Living Married: \n')
     writable.write(str(list_living_married) + '\n')
 
+    ''' US33: List Orphans '''
+    res_us33 = pr.list_orphans(indi_dict, fam_dict)
+    list_orphans = PrettyTable(field_names=['Individual ID', 'Name'])
+    for res, value in res_us33.items():
+        list_orphans.add_row([res, value])
+    writable.write('\n' + 'US33: List Orphans: \n')
+    writable.write(str(list_orphans) + '\n')
+
+    ''' US21: Correct gender for role '''
+    res_us21 = pr.correct_gender_for_role(indi_dict, fam_dict)
+    correct_gender = PrettyTable(field_names=['Family ID', 'Error'])
+    for res, value in res_us21.items():
+        correct_gender.add_row([res, value])
+    writable.write('\n' + 'US21: Correct gender for role: \n')
+    writable.write(str(correct_gender) + '\n')
+
 
 # acceptance_test(indi_dict, fam_dict)
 acceptance_test()

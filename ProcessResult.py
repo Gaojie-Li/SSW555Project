@@ -639,7 +639,9 @@ def no_bigamy(indi_id, indi_dict, fam_dict):
 
     return True
 
+
 """ US 30: List Living Married """
+
 
 def list_living_married(indi_dict, fam_dict):
     if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
@@ -650,6 +652,49 @@ def list_living_married(indi_dict, fam_dict):
         if 'DEAT' in value or 'FAMS' not in value:
             continue
         result.append(indi)
-    
+
     return result
-        
+
+
+""" US33: List Orphans """
+
+
+def list_orphans(indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    result = defaultdict(str)
+    for indi, value in indi_dict.items():
+        if 'FAMC' not in value:
+            continue
+
+        age = int(value['BIRT'].split('-')[0]) - 2018
+        fam = value['FAMC'].strip(',')
+        father = fam_dict[fam]['HUSB']
+        mother = fam_dict[fam]['WIFE']
+        if 'DEAT' not in indi_dict[father] and 'DEAT' not in indi_dict[mother]:
+            continue
+        father_deat_year = int((
+            indi_dict[father]['DEAT'] if 'DEAT' in indi_dict[father] else '9999-99-99').split('-')[0])
+        mother_deat_year = int((
+            indi_dict[mother]['DEAT'] if 'DEAT' in indi_dict[mother] else '9999-99-99').split('-')[0])
+
+        if age - (2018 - father_deat_year) < 18 and age - (2018 - mother_deat_year) < 18:
+            result[indi] = value['NAME']
+
+    return result
+
+
+""" US21: Correct gender for role """
+
+
+def correct_gender_for_role(indi_dict, fam_dict):
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    result = defaultdict(str)
+    for fam, value in fam_dict.items():
+        if indi_dict[value['HUSB']]['SEX'] != 'M' or indi_dict[value['WIFE']]['SEX'] != 'F':
+            result[fam] = 'Gender in correct for either husband or wife.'
+
+    return result
