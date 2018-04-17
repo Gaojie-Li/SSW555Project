@@ -9,9 +9,9 @@ THIS_YEAR = 2018
 def acceptance_test():
     ProcessGED.process_ged('./tree.ged', './ged_result.txt')
     indi_dict, fam_dict = pr.process_result('./ged_result.txt')
-    print(indi_dict)
-    print('\n')
-    print(fam_dict)
+    # print(indi_dict)
+    # print('\n')
+    # print(fam_dict)
 
     writable = open('TestResult.txt', 'w')
 
@@ -180,6 +180,7 @@ def acceptance_test():
     res_us18 = pr.siblings_no_marriage(indi_dict, fam_dict)
     if res_us18 != True:
         writable.write('\n' + res_us18 + '\n')
+
 
 # acceptance_test(indi_dict, fam_dict)
 acceptance_test()

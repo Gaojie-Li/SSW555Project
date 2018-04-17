@@ -87,7 +87,7 @@ def get_properties(readable, i):
             continue
 
         if level != '1':
-            assert(level == '0')
+            # assert(level == '0')
             break  # level == 0
 
         if tag in TAG_W_EXTENSION:
