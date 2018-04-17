@@ -171,6 +171,15 @@ def acceptance_test():
     writable.write('\n' + 'US21: Correct gender for role: \n')
     writable.write(str(correct_gender) + '\n')
 
+    ''' US10: Marriage should be at least 14 years after birth of both spouses '''
+    res_us10 = pr.marriage_after_14(indi_dict, fam_dict)
+    if res_us10 != True:
+        writable.write('\n' + res_us10 + '\n')
+
+    ''' US18: Siblings should not marry '''
+    res_us18 = pr.siblings_no_marriage(indi_dict, fam_dict)
+    if res_us18 != True:
+        writable.write('\n' + res_us18 + '\n')
 
 # acceptance_test(indi_dict, fam_dict)
 acceptance_test()

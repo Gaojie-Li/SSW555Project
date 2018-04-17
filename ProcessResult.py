@@ -742,3 +742,53 @@ def correct_gender_for_role(indi_dict, fam_dict):
             result[fam] = 'Gender in correct for either husband or wife.'
 
     return result
+
+
+def siblings_no_marriage(indi_dict, fam_dict):
+    ''' US18: Siblings should not marry
+    '''
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+    
+    for fam_id in fam_dict:
+        children = fam_dict[fam_id]['CHIL'].strip(',').split(',')
+        if len(children) < 2:
+            continue
+
+        spou_sets = []
+        for chil_id in children:
+            if 'FAMS' not in indi_dict[chil_id]:
+                continue
+            spou_sets.append(set(indi_dict[chil_id]['FAMS'].strip(',').split(',')))
+
+        if (len(spou_sets) > 1) and (len(spou_sets[0].intersection(*spou_sets)) > 0):
+            return "ERROR: FAMILY: US18: {}: Some children among {} are marrying each other!".format(fam_id, children)
+        
+    return True
+
+def marriage_after_14(indi_dict, fam_dict):
+    ''' US10: Marriage should be at least 14 years after birth of both spouses (parents must be at least 14 years old)
+    '''
+    if type(indi_dict) != defaultdict or type(fam_dict) != defaultdict:
+        return 'Invalid dictionary type.'
+
+    for fam_id in fam_dict:
+        if 'MARR' not in fam_dict[fam_id]:
+            continue
+
+        husb_id = fam_dict[fam_id]['HUSB']
+        wife_id = fam_dict[fam_id]['WIFE']
+
+        husb_birt = indi_dict[husb_id]['BIRT'].split('-')
+        wife_birt = indi_dict[wife_id]['BIRT'].split('-')
+
+        hb_ymd = [(int(field) if field != '00' else 1) for field in husb_birt]
+        wb_ymd = [(int(field) if field != '00' else 1) for field in wife_birt]
+        mar_ymd = [(int(field) if field != '00' else 1) for field in fam_dict[fam_id]['MARR'].split('-')]
+
+        if not is_before([hb_ymd[0] + 14, hb_ymd[1], hb_ymd[2]], mar_ymd
+            ) or not is_before([wb_ymd[0] + 14, wb_ymd[1], wb_ymd[2]], mar_ymd):
+            return "ERROR: FAMILY: US10: {}: Spouses {}-{} are marrying too young!".format(fam_id, husb_id, wife_id)
+        
+    return True
+
